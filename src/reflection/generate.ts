@@ -19,6 +19,7 @@ import {generateRuntimeSpec} from "./generators/generateRuntimeSpec";
 import {generateFunctionTypes} from "./generators/generateFunctionTypes";
 import {generateOperators} from "./generators/generateOperatorTypes";
 import {generateSetImpl} from "./generators/generateSetImpl";
+import { generateIntrospection } from "./generators/generateIntrospection";
 
 const DEBUG = false;
 
@@ -44,8 +45,9 @@ export async function generateQB(params: {
   outputDir: string;
   connectionConfig: ConnectConfig;
   target: "ts" | "esm" | "cjs";
-}): Promise<void> {
-  const {outputDir, connectionConfig, target} = params;
+  introspectOnly: boolean
+}) {
+  const {outputDir, connectionConfig, target, introspectOnly} = params;
   // tslint:disable-next-line
   console.log(`Connecting to EdgeDB instance...`);
   let cxn: Client;
@@ -89,6 +91,11 @@ export async function generateQB(params: {
       functions,
       operators,
     };
+    if (introspectOnly || true){
+      generateIntrospection(generatorParams)
+      return
+    }
+    generateRuntimeSpec(generatorParams);
     generateRuntimeSpec(generatorParams);
     generateCastMaps(generatorParams);
     generateScalars(generatorParams);

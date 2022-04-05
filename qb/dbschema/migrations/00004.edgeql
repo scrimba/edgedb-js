@@ -1,8 +1,5 @@
-CREATE MIGRATION m15beoho5bjejmlmbvf4lxmxebksdqbktggbkiohkbcipzjtqo4ola
-    ONTO m13wjddw5v2qop66go76ghzefhhr3pa6ojc336sjyff6ticrbrynla
+CREATE MIGRATION m1fs3jdinp2o4axlqqpsiomzqqznnvlxfucxisghu6odqmxbobuczq
+    ONTO m1zgyifc4wmsqblwzdjtntjarr5shcbdoe3sbis4mn5mexsh4qwo3q
 {
-  CREATE SCALAR TYPE default::bag_seq EXTENDING std::sequence;
-  ALTER TYPE default::Bag {
-      CREATE PROPERTY seqField -> default::bag_seq;
-  };
+  ALTER ABSTRACT ANNOTATION default::id_num RENAME TO default::decorator_model;
 };

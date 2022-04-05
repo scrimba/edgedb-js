@@ -21,6 +21,7 @@ interface Options {
   passwordFromStdin?: boolean;
   forceOverwrite?: boolean;
   updateIgnoreFile?: boolean;
+  introspectOnly?: boolean;
 }
 
 const run = async () => {
@@ -272,7 +273,7 @@ OPTIONS:
     connectionConfig.password = await readPasswordFromStdin();
   }
 
-  await generateQB({outputDir, connectionConfig, target: options.target!});
+  await generateQB({outputDir, connectionConfig, target: options.target!, introspectOnly: !!options.introspectOnly});
 
   console.log(`Generation successful!`);
 

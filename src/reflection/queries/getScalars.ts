@@ -29,7 +29,18 @@ select InheritingObject {
   bases: { id, name },
   ancestors: { id, name },
   children := .<bases[IS Type] { id, name },
-  descendants := .<ancestors[IS Type] { id, name }
+  descendants := .<ancestors[IS Type] { id, name },
+  [IS ScalarType].constraints: {
+    name,
+    expr,
+    annotations: { name, @value },
+    subject: { name, id },
+    params: { name, @value, type: { name } },
+    return_typemod,
+    return_type: { name },
+    errmessage,
+  },
+  [IS ScalarType].annotations:{ name, @value }
 }
 FILTER
   InheritingObject IS ScalarType OR
@@ -46,13 +57,13 @@ FILTER
       ancestors: {id: string; name: string}[];
       children: {id: string; name: string}[];
       descendants: {id: string; name: string}[];
+      constraints: {name: string, subject: {name: string, id: string}}[]; // ...complete lates
     }
   >();
 
   for (const type of JSON.parse(scalarArray)) {
     scalars.set(type.id, type);
   }
-
   return scalars;
   // initialize castsBySource and types
   // const types = new Set<string>();

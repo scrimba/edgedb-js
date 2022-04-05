@@ -111,135 +111,31 @@ export const typeMapping = new Map([
   ],
 ]);
 
-export async function getTypes(
+export async function getConstraints(
   cxn: Executor,
   params?: {debug?: boolean}
 ): Promise<Types> {
   const QUERY = `
-    WITH
-      MODULE schema,
-
-      material_scalars := (
-        SELECT ScalarType
-        FILTER
-          (.name LIKE 'std::%' OR .name LIKE 'cal::%')
-          AND NOT .is_abstract
-      )
-
-    SELECT Type {
-      id,
+  with module schema
+  select ScalarType {
       name,
-      is_abstract,
-
-      kind := 'object' IF Type IS ObjectType ELSE
-              'scalar' IF Type IS ScalarType ELSE
-              'array' IF Type IS Array ELSE
-              'tuple' IF Type IS Tuple ELSE
-              'unknown',
-      [IS ScalarType].constraints: {
-        name,
-        expr,
-        annotations: { name, @value },
-        subject: { name, id },
-        params: { name, @value, type: { name } },
-        return_typemod,
-        return_type: { name },
-        errmessage,
+      constraints: {
+          name,
+          expr,
+          annotations: { name, @value },
+          subject: { name, id },
+          params: { name, @value, type: { name } },
+          return_typemod,
+          return_type: { name },
+          errmessage,
       },
-      [IS ObjectType].properties: {
-        name, default, required, is_abstract, abstract, builtin, is_final,
-        expr, inherited_fields , final, readonly,
-        computed_fields , id,
-        annotations:{ name, @value },
-        target:{name, id}
-      } Filter .internal = false,
-      [IS ScalarType].enum_values,
-      is_seq := 'std::sequence' in [IS ScalarType].ancestors.name,
-      # for sequence (abstract type that has non-abstract ancestor)
-      single material_id := (
-        SELECT x := Type[IS ScalarType].ancestors
-        FILTER x IN material_scalars
-        LIMIT 1
-      ).id,
-
-      [IS InheritingObject].bases: {
-        id
-      } ORDER BY @index ASC,
-
-      [IS ObjectType].union_of,
-      [IS ObjectType].intersection_of,
-      [IS ObjectType].pointers: {
-        real_cardinality := ("One" IF .required ELSE "AtMostOne") IF <str>.cardinality = "One" ELSE ("AtLeastOne" IF .required ELSE "Many"),
-        name,
-        target_id := .target.id,
-        kind := 'link' IF .__type__.name = 'schema::Link' ELSE 'property',
-        is_exclusive := exists (select .constraints filter .name = 'std::exclusive'),
-        is_computed := len(.computed_fields) != 0,
-        is_readonly := .readonly,
-        has_default := EXISTS .default or ("std::sequence" in .target[IS ScalarType].ancestors.name),
-        [IS Link].pointers: {
-          real_cardinality := ("One" IF .required ELSE "AtMostOne") IF <str>.cardinality = "One" ELSE ("AtLeastOne" IF .required ELSE "Many"),
-          name := '@' ++ .name,
-          target_id := .target.id,
-          kind := 'link' IF .__type__.name = 'schema::Link' ELSE 'property',
-          is_computed := len(.computed_fields) != 0,
-          is_readonly := .readonly
-        } filter .name != '@source' and .name != '@target',
-      } FILTER @is_owned,
-      backlinks := (SELECT DETACHED Link FILTER .target = Type) {
-        real_cardinality := "AtMostOne"
-          IF
-          EXISTS (select .constraints filter .name = 'std::exclusive')
-          ELSE
-          "Many",
-        name := '<' ++ .name ++ '[is ' ++ std::assert_exists(
-          .source.name if .source.name[:9] != 'default::' else .source.name[9:]
-        ) ++ ']',
-        stub := .name,
-        target_id := .source.id,
-        kind := 'link',
-        is_exclusive := (EXISTS (select .constraints filter .name = 'std::exclusive')) AND <str>.cardinality = "One",
-      },
-      backlink_stubs := array_agg((
-        WITH
-          stubs := DISTINCT (SELECT DETACHED Link FILTER .target = Type).name,
-          baseObjectId := (SELECT DETACHED ObjectType FILTER .name = 'std::BaseObject' LIMIT 1).id
-        FOR stub in { stubs }
-        UNION (
-          SELECT {
-            real_cardinality := "Many",
-            name := '<' ++ stub,
-            target_id := baseObjectId,
-            kind := 'link',
-            is_exclusive := false,
-          }
-        )
-      )),
-      array_element_id := [IS Array].element_type.id,
-
-      tuple_elements := (SELECT [IS Tuple].element_types {
-        target_id := .type.id,
-        name
-      } ORDER BY @index ASC),
-    }
-    ORDER BY .name;
+  } FILTER exists .constraints
   `;
-    const ANNOTATIONS = `
-      WITH MODULE schema
-        Select ObjectType {
-          id, 
-          annotations: {name, @value}
-        } Filter exists(.annotations)
-        `
-        const types: Type[] = JSON.parse(await cxn.queryJSON(QUERY));
-        const annotations: any =JSON.parse(await cxn.queryJSON(ANNOTATIONS));
+
+  const types: Type[] = JSON.parse(await cxn.queryJSON(QUERY));
   // tslint:disable-next-line
   if (params?.debug) console.log(JSON.stringify(types, null, 2));
 
-  let a:any = {};
-  annotations.forEach(({id, annotations})=>{
-    a[id] = annotations
-  })
   // remap types
   for (const type of types) {
     switch (type.kind) {
@@ -271,9 +167,6 @@ export async function getTypes(
         // }));
         break;
       case "object":
-        if(a[type.id]){
-          type.annotations = a[type.id]
-        }  
         // type.pointers = type.pointers.map(pointer => ({
         //   ...pointer,
         //   target_id:

@@ -1,9 +1,7 @@
-CREATE MIGRATION m13wjddw5v2qop66go76ghzefhhr3pa6ojc336sjyff6ticrbrynla
-    ONTO m17u5iclyhikkz2ww5mwvqouwdo3k2o7pfaov32pai6asffsecvoca
+CREATE MIGRATION m1zgyifc4wmsqblwzdjtntjarr5shcbdoe3sbis4mn5mexsh4qwo3q
+    ONTO m1jaf7mi37erkzhlnredcoch6vzdf3jgkcsk3y3qvbopy4tf7soybq
 {
-  ALTER TYPE default::Movie {
-      ALTER PROPERTY title {
-          CREATE CONSTRAINT std::exclusive;
-      };
+  ALTER SCALAR TYPE default::permission {
+      CREATE ANNOTATION std::description := '8 bits representing the permission';
   };
 };

@@ -1,8 +1,7 @@
-CREATE MIGRATION m1u6lpszc2ef6z6zsx4ovnug42un3gfjmadwhjfm47du3ext3vpaoq
-    ONTO m15beoho5bjejmlmbvf4lxmxebksdqbktggbkiohkbcipzjtqo4ola
+CREATE MIGRATION m1dbrujakkzawfjqbv252o44idjv6zz5qwiwsvgemctazodpaeqvhq
+    ONTO m1fs3jdinp2o4axlqqpsiomzqqznnvlxfucxisghu6odqmxbobuczq
 {
-  CREATE TYPE default::User {
-      CREATE REQUIRED LINK favourite_movie -> default::Movie;
-      CREATE REQUIRED PROPERTY username -> std::str;
+  ALTER TYPE default::Hub {
+      CREATE ANNOTATION std::description := 'A Hub is a space that every entity should be part of. For now, we only have Scrimba but this could change in the future';
   };
 };

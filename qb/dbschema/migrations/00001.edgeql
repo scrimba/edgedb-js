@@ -1,106 +1,61 @@
-CREATE MIGRATION m1qxdmnjre6ij6fj5u7qyvwkzcdgg33qygdldy6ntl6o24ls7yq5xa
+CREATE MIGRATION m1a7dwxnfxpqhtftejyxcxhcfs5qib64fccigbxxj4o6qw5mqevefq
     ONTO initial
 {
-  CREATE MODULE `💯💯💯` IF NOT EXISTS;
-  CREATE ABSTRACT ANNOTATION default::`🍿`;
-  CREATE FUNCTION default::`💯`(NAMED ONLY `🙀`: std::int64) ->  std::int64 {
-      SET volatility := 'Immutable';
-      CREATE ANNOTATION default::`🍿` := 'fun!🚀';
-      USING (SELECT
-          (100 - `🙀`)
-      )
-  ;};
-  CREATE SCALAR TYPE default::Genre EXTENDING enum<Horror, Action, RomCom>;
-  CREATE ABSTRACT TYPE default::HasAge {
-      CREATE PROPERTY age -> std::int64;
+  CREATE ABSTRACT LINK default::orderable {
+      CREATE PROPERTY name -> std::str {
+          CREATE DELEGATED CONSTRAINT std::exclusive;
+      };
   };
-  CREATE ABSTRACT TYPE default::HasName {
-      CREATE PROPERTY name -> std::str;
+  CREATE ABSTRACT TYPE default::Agent {
+      CREATE REQUIRED PROPERTY name -> std::str;
   };
-  CREATE TYPE default::Bag EXTENDING default::HasName, default::HasAge {
-      CREATE PROPERTY enumArr -> array<default::Genre>;
-      CREATE PROPERTY bigintField -> std::bigint;
-      CREATE PROPERTY boolField -> std::bool;
-      CREATE PROPERTY datetimeField -> std::datetime;
-      CREATE PROPERTY decimalField -> std::decimal;
-      CREATE PROPERTY durationField -> std::duration;
-      CREATE PROPERTY float32Field -> std::float32;
-      CREATE PROPERTY float64Field -> std::float64;
-      CREATE PROPERTY genre -> default::Genre;
-      CREATE PROPERTY int16Field -> std::int16;
-      CREATE PROPERTY int32Field -> std::int32;
-      CREATE PROPERTY int64Field -> std::int64;
-      CREATE PROPERTY localDateField -> cal::local_date;
-      CREATE PROPERTY localDateTimeField -> cal::local_datetime;
-      CREATE PROPERTY localTimeField -> cal::local_time;
-      CREATE PROPERTY namedTuple -> tuple<x: std::str, y: std::int64>;
-      CREATE PROPERTY secret_identity -> std::str;
-      CREATE MULTI PROPERTY stringMultiArr -> array<std::str>;
-      CREATE PROPERTY stringsArr -> array<std::str>;
-      CREATE REQUIRED MULTI PROPERTY stringsMulti -> std::str;
-      CREATE PROPERTY unnamedTuple -> tuple<std::str, std::int64>;
+  CREATE ABSTRACT TYPE default::Entity {
+      CREATE REQUIRED PROPERTY legacy_id -> std::str;
+      CREATE REQUIRED PROPERTY name -> std::str;
   };
-  CREATE ABSTRACT CONSTRAINT default::`🚀🍿`(max: std::int64) EXTENDING std::max_len_value;
-  CREATE TYPE default::A;
-  CREATE SCALAR TYPE default::你好 EXTENDING std::str;
-  CREATE SCALAR TYPE default::مرحبا EXTENDING default::你好 {
-      CREATE CONSTRAINT default::`🚀🍿`(100);
+  CREATE TYPE default::Course EXTENDING default::Entity;
+  CREATE TYPE default::Role EXTENDING default::Agent;
+  CREATE TYPE default::Playlist EXTENDING default::Entity;
+  ALTER TYPE default::Course {
+      CREATE MULTI LINK playlists EXTENDING default::orderable -> default::Playlist;
   };
-  CREATE SCALAR TYPE default::`🚀🚀🚀` EXTENDING default::مرحبا;
-  CREATE TYPE default::Łukasz {
-      CREATE LINK `Ł💯` -> default::A {
-          CREATE PROPERTY `🙀مرحبا🙀` -> default::مرحبا {
-              CREATE CONSTRAINT default::`🚀🍿`(200);
+  CREATE TYPE default::Scrim EXTENDING default::Entity;
+  ALTER TYPE default::Playlist {
+      CREATE MULTI LINK scrims EXTENDING default::orderable -> default::Scrim;
+  };
+  CREATE TYPE default::User EXTENDING default::Agent {
+      CREATE MULTI LINK pins -> default::Entity;
+      CREATE MULTI LINK stars -> default::Entity;
+      CREATE MULTI LINK roles -> default::Role;
+      CREATE MULTI LINK views -> default::Scrim {
+          CREATE PROPERTY progress -> std::decimal {
+              SET default := 0;
+              CREATE CONSTRAINT std::max_value(100);
+              CREATE CONSTRAINT std::min_value(0);
           };
-          CREATE PROPERTY `🙀🚀🚀🚀🙀` -> default::`🚀🚀🚀`;
       };
-      CREATE REQUIRED PROPERTY `Ł🤞` -> default::`🚀🚀🚀` {
-          SET default := (<default::`🚀🚀🚀`>'你好🤞');
-      };
-      CREATE INDEX ON (.`Ł🤞`);
+      CREATE REQUIRED PROPERTY legacy_id -> std::str;
   };
-  CREATE TYPE default::`S p a M` {
-      CREATE REQUIRED PROPERTY `🚀` -> std::int32;
-      CREATE PROPERTY c100 := (SELECT
-          default::`💯`(`🙀` := .`🚀`)
-      );
+  CREATE SCALAR TYPE default::permission EXTENDING std::bytes {
+      CREATE CONSTRAINT std::max_value(b'11111111');
+      CREATE CONSTRAINT std::min_value(b'0');
   };
-  CREATE FUNCTION `💯💯💯`::`🚀🙀🚀`(`🤞`: default::`🚀🚀🚀`) ->  default::`🚀🚀🚀` USING (SELECT
-      <default::`🚀🚀🚀`>(`🤞` ++ 'Ł🙀')
-  );
-  CREATE ABSTRACT LINK default::movie_character {
-      CREATE PROPERTY character_name -> std::str;
+  CREATE TYPE default::Permission {
+      CREATE REQUIRED LINK agent -> default::Agent;
+      CREATE REQUIRED LINK entity -> default::Entity;
+      CREATE REQUIRED PROPERTY allows -> default::permission;
+      CREATE REQUIRED PROPERTY denies -> default::permission;
   };
-  CREATE ABSTRACT TYPE default::Person {
-      CREATE REQUIRED PROPERTY name -> std::str {
-          CREATE CONSTRAINT std::exclusive;
-      };
+  ALTER TYPE default::Entity {
+      CREATE REQUIRED LINK creator -> default::User;
   };
-  CREATE TYPE default::Profile {
-      CREATE PROPERTY plot_summary -> std::str;
+  CREATE TYPE default::Hub {
+      CREATE REQUIRED LINK creator -> default::User;
+      CREATE REQUIRED PROPERTY legacy_id -> std::str;
+      CREATE REQUIRED PROPERTY name -> std::str;
   };
-  CREATE TYPE default::Movie {
-      CREATE MULTI LINK characters EXTENDING default::movie_character -> default::Person;
-      CREATE LINK profile -> default::Profile {
-          CREATE CONSTRAINT std::exclusive;
-      };
-      CREATE PROPERTY genre -> default::Genre;
-      CREATE PROPERTY rating -> std::float64;
-      CREATE REQUIRED PROPERTY title -> std::str;
+  ALTER TYPE default::Entity {
+      CREATE REQUIRED LINK hub -> default::Hub;
   };
-  ALTER TYPE default::A {
-      CREATE REQUIRED LINK `s p A m 🤞` -> default::`S p a M`;
-  };
-  CREATE TYPE default::Simple EXTENDING default::HasName, default::HasAge;
-  CREATE TYPE default::Hero EXTENDING default::Person {
-      CREATE PROPERTY number_of_movies -> std::int64;
-      CREATE PROPERTY secret_identity -> std::str;
-  };
-  CREATE TYPE default::Villain EXTENDING default::Person {
-      CREATE LINK nemesis -> default::Hero;
-  };
-  ALTER TYPE default::Hero {
-      CREATE MULTI LINK villains := (.<nemesis[IS default::Villain]);
-  };
-  CREATE TYPE default::MovieShape;
+  CREATE TYPE default::Topic EXTENDING default::Entity;
 };

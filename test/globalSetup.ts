@@ -56,7 +56,7 @@ export const generateStatusFileName = (tag: string): string => {
 };
 
 export const getServerCommand = (statusFile: string): string[] => {
-  let srvcmd = "edgedb-server";
+  let srvcmd = "edgedb server";
   if (process.env.EDGEDB_SERVER_BIN) {
     srvcmd = process.env.EDGEDB_SERVER_BIN;
   }
